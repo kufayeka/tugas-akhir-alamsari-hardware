@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import globals_variables as gv
+import global_variables as gv
 import multiprocessing
 import RPi.GPIO as GPIO
 import time
