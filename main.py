@@ -63,6 +63,7 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') # Get the current timestamp
         row = (temp1.value, timestamp)
         ws.append(row)
+        wb.save(excel_name) # Save the Excel workbook
 
         time.sleep(1)
 
@@ -135,7 +136,7 @@ if __name__ == '__main__':
         p3.terminate()
 
         # Save the Excel workbook & Close the workbook when done
-        wb.save(excel_name)
+        #wb.save(excel_name)
         wb.close()
 
         print("TERMINATED...")
