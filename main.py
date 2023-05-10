@@ -34,6 +34,7 @@ ws.title = 'Data'
 
 ws.cell(row=1, column=1, value='Value')
 ws.cell(row=1, column=2, value='Timestamp')
+ws.cell(row=1, column=3, value='Set Point')
 
 # map/scale PID output into 0 - 100 range
 def map_range(value, inMin, inMax, outMin, outMax):
@@ -63,15 +64,20 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         print("PWM Timing / DutyCycle (secs): ")
         print(f"\tHigh Time:{PWM_high_time.value:.3f} | Low Time:{PWM_low_time.value:.3f}")
 
-        # record the climate data every second
-        current_temp_value = temp1.value
-        if current_temp_value != prev_temp_value:
-            row = (current_temp_value, timestamp)
-            ws.append(row)
-            wb.save(excel_name)
-            prev_temp_value = current_temp_value
+        # record the climate data only when changes detected
+        #current_temp_value = temp1.value
+        #if current_temp_value != prev_temp_value:
+        #    row = (current_temp_value, timestamp)
+        #    ws.append(row)
+        #    wb.save(excel_name)
+        #    prev_temp_value = current_temp_value
 
-        time.sleep(1)
+        # record the climate data every second
+        row = (temp1.value, timestamp, PID_set_point.value)
+        ws.append(row)
+        wb.save(excel_name)
+
+        time.sleep(10)
 
 def process2(hum1, PID_kp, PID_ki, PID_kd, PID_pv, PID_output, PID_set_point, PWM_enabled, PWM_high_time, PWM_low_time):
     while True:
