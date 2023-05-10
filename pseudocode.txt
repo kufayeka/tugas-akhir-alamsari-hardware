@@ -2,3 +2,20 @@ proses read_sensor "mengubah" variable temp1, hum1
 proses calculate_pid_output "membutuhkan" variable hum1, kp, ki untuk menghitung output yang nanti "mengubah" variable outputPID
 proses PWM "membutuhkan" variable outputPID
 proses mqtt_conn "mengubah" variable kp, ki dan "membutuhkan" temp1, hum1 untuk dipublish ke server sebagai monitoring
+
+
+write me a 3 simple python module like this below:
+
+globals.py: define A variable
+main.py: print A variable value from globals.py every 1 seconds
+incrementer.py: add A variable + 1 in globals.py every 1 seconds
+
+
+
+write me a simple python program that creates new record in sqlite3 table every second.
+
+I want the record style to be like this:
+value           | timestamp
+random_value    | current_timestamp
+
+and everytime I run the script, it creates new sqlite3 db file named: data_klimat_$timestamp(tanggal, jam saat script dijalankan).db

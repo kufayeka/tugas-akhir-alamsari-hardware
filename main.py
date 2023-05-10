@@ -35,6 +35,7 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         read_climate_sensors()
 
         print("____________________________________")
+        print("Test:", test)
         print("Current Sensor Readings: ")
         print(f"\tTemp 1:{temp1.value:.3f} | Hum 1:{hum1.value:.3f}")
         print(f"\tTemp 2:{temp2.value:.3f} | Hum 2:{hum2.value:.3f}")
@@ -42,7 +43,7 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         print(f"PID Parameters: kp:{PID_kp.value} | ki:{PID_ki.value} | kd:{PID_kd.value}")
         print("PID PV:", PID_pv.value)
         print("PID Set Point:", PID_set_point.value)
-        print("PID Output:", PID_output.value)
+        print(f"PID Output: {PID_output.value:.3f}")
         print()
         print("PWM Timing / DutyCycle (secs): ")
         print(f"\tHigh Time:{PWM_high_time.value:.3f} | Low Time:{PWM_low_time.value:.3f}")
@@ -51,15 +52,21 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
 
 def process2(hum1, PID_kp, PID_ki, PID_kd, PID_pv, PID_output, PID_set_point, PWM_enabled, PWM_high_time, PWM_low_time):
     while True:
+
         # calculate PID out based on feedback value (humidity/temperature)
-        PID_kp, PID_ki, PID_kd = pid.components
         feedback = hum1.value
-        pid.setpoint = PID_set_point.value
+        set_point = PID_set_point.value
+
+        pid.setpoint = set_point
         pid_out = pid(feedback)
 
+        # update tuning with the newest setting while system is running
+        pid.tunings = (PID_kp.value, PID_ki.value, PID_kd.value)
+        p, i, d = pid.components
+
         # set the pv variable based on hum1 value
-        PID_pv.value = feedback
-        PID_output.value = pid_out
+        PID_pv.value = round(feedback, 3)
+        PID_output.value = round(pid_out, 3)
 
         # convert PID output to GPIO high and low time range (relayPin)
         # maximum interval ON = 10 seconds
@@ -95,8 +102,8 @@ if __name__ == '__main__':
     p3 = multiprocessing.Process(target=process3, args=(gv.PWM_enabled, gv.PWM_high_time, gv.PWM_low_time,))
 
     try:
-        GPIO.output(relayPin, GPIO.LOW)
         print("STARTING...")
+        GPIO.output(relayPin, GPIO.LOW)
         p1.start()
         p2.start()
         p3.start()
