@@ -42,12 +42,16 @@ def map_range(value, inMin, inMax, outMin, outMax):
 
 # Method process1 is used to read RS485 climate sensors, calculate PID output value based on the climate sensors data
 def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_set_point, PID_pv, PWM_high_time, PWM_low_time):
+    # Initialize the previous temperature value
+    prev_temp_value = None
+
     while True:
         # read RS485 climate sensors
         read_climate_sensors()
 
+        timestamp = datetime.datetime.now().strftime('%H:%M:%S') # Get the current timestamp
         print("____________________________________")
-        print("Current Sensor Readings: ")
+        print(f"Current Sensor Readings: ({timestamp})")
         print(f"\tTemp 1:{temp1.value:.3f} | Hum 1:{hum1.value:.3f}")
         print(f"\tTemp 2:{temp2.value:.3f} | Hum 2:{hum2.value:.3f}")
         print()
@@ -60,10 +64,12 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         print(f"\tHigh Time:{PWM_high_time.value:.3f} | Low Time:{PWM_low_time.value:.3f}")
 
         # record the climate data every second
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') # Get the current timestamp
-        row = (temp1.value, timestamp)
-        ws.append(row)
-        wb.save(excel_name) # Save the Excel workbook
+        current_temp_value = temp1.value
+        if current_temp_value != prev_temp_value:
+            row = (current_temp_value, timestamp)
+            ws.append(row)
+            wb.save(excel_name)
+            prev_temp_value = current_temp_value
 
         time.sleep(1)
 

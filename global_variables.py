@@ -7,7 +7,7 @@ temp2 = manager.Value('d', 0.000)
 hum1 = manager.Value('d', 0.000)
 hum2 = manager.Value('d', 0.000)
 
-PID_kp = manager.Value('d', 10)
+PID_kp = manager.Value('d', 5)
 PID_ki = manager.Value('d', 0)
 PID_kd = manager.Value('d', 0)
 PID_set_point = manager.Value('d', 34)
