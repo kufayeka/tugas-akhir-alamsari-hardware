@@ -4,14 +4,13 @@ import multiprocessing
 import RPi.GPIO as GPIO
 import time
 
-from sensors import read_climate_sensors
+from climate_sensors import read_climate_sensors
 from simple_pid import PID
 
 relayPin = 12
 GPIO.setwarnings(False) 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(relayPin, GPIO.OUT)
-GPIO.output(relayPin, GPIO.LOW) 
 
 # setup pid
 pid = PID(gv.pid_parameters['kp'], gv.pid_parameters['ki'], gv.pid_parameters['kp'])
@@ -70,24 +69,26 @@ if __name__ == '__main__':
     p3 = multiprocessing.Process(target=process3, args=(gv.pid_output, gv.pid_parameters, gv.sensors_climate_readings,))
 
     try:
+        GPIO.output(relayPin, GPIO.LOW)
         print("STARTING...")
         p1.start()
         p2.start()
-        p3.start()
+        #p3.start()
 
         p1.join()
         p2.join()
-        p3.join()
+        #p3.join()
             
     except KeyboardInterrupt:
         GPIO.cleanup()
         p1.terminate()
         p2.terminate()
-        p3.terminate()
+        #p3.terminate()
+        print("TERMINATED...")
         time.sleep(0.1)
     
     except ValueError:  
-        print("error")
+        print("PROGRAM ERROR")
         time.sleep(0.5)
 
     finally:  

@@ -1,0 +1,4 @@
+proses read_sensor "mengubah" variable temp1, hum1
+proses calculate_pid_output "membutuhkan" variable hum1, kp, ki untuk menghitung output yang nanti "mengubah" variable outputPID
+proses PWM "membutuhkan" variable outputPID
+proses mqtt_conn "mengubah" variable kp, ki dan "membutuhkan" temp1, hum1 untuk dipublish ke server sebagai monitoring
