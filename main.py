@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import datetime
 import global_variables as gv
 import multiprocessing
+import openpyxl
 import RPi.GPIO as GPIO
 import time
 
@@ -23,6 +25,16 @@ pid.differential_on_measurement = True
 # multiprocessing variables manager
 manager = multiprocessing.Manager()
 
+# excel (data testing)
+excel_name = f"data_klimat_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+wb = openpyxl.Workbook()
+ws = wb.active
+ws.title = 'Data'
+
+ws.cell(row=1, column=1, value='Value')
+ws.cell(row=1, column=2, value='Timestamp')
+
 # map/scale PID output into 0 - 100 range
 def map_range(value, inMin, inMax, outMin, outMax):
     result = outMin + (((value - inMin) / (inMax - inMin)) * (outMax - outMin))
@@ -35,7 +47,6 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         read_climate_sensors()
 
         print("____________________________________")
-        print("Test:", test)
         print("Current Sensor Readings: ")
         print(f"\tTemp 1:{temp1.value:.3f} | Hum 1:{hum1.value:.3f}")
         print(f"\tTemp 2:{temp2.value:.3f} | Hum 2:{hum2.value:.3f}")
@@ -47,6 +58,11 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         print()
         print("PWM Timing / DutyCycle (secs): ")
         print(f"\tHigh Time:{PWM_high_time.value:.3f} | Low Time:{PWM_low_time.value:.3f}")
+
+        # record the climate data every second
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') # Get the current timestamp
+        row = (temp1.value, timestamp)
+        ws.append(row)
 
         time.sleep(1)
 
@@ -117,6 +133,11 @@ if __name__ == '__main__':
         p1.terminate()
         p2.terminate()
         p3.terminate()
+
+        # Save the Excel workbook & Close the workbook when done
+        wb.save(excel_name)
+        wb.close()
+
         print("TERMINATED...")
         time.sleep(0.1)
     
