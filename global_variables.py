@@ -7,34 +7,14 @@ temp2 = manager.Value('d', 0.000)
 hum1 = manager.Value('d', 0.000)
 hum2 = manager.Value('d', 0.000)
 
-PID_kp = manager.Value('d', 0.500)
-PID_ki = manager.Value('d', 0.050)
-PID_kd = manager.Value('d', 0.001)
-PID_set_point = manager.Value('d', 90.000)
+PID_kp = manager.Value('d', 10.000)
+PID_ki = manager.Value('d', 5)
+PID_kd = manager.Value('d', 0.01)
+PID_set_point = manager.Value('d', 33)
 PID_pv = manager.Value('d', 0.000)
 PID_output = manager.Value('d', 0.000)
 
+PWM_enabled = manager.Value('d', 1)
 PWM_high_time = manager.Value('d', 0.000)
 PWM_low_time = manager.Value('d', 0.000)
 
-
-pid_output = manager.dict({
-    'pwm_enabled': True,
-    'high_time': 0,
-    'low_time': 0,
-})
-
-sensors_climate_readings = manager.dict({
-    'temp1': 0,
-    'temp2': 0,
-    'hum1': 0,
-    'hum2': 0,
-})
-
-
-pid_output = manager.dict({
-    'pwm_enabled': True,
-    'high_time': 0,
-    'low_time': 0,
-    'output': 0,
-})
