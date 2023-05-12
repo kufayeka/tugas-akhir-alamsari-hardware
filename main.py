@@ -31,10 +31,11 @@ excel_name = f"data_klimat_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.x
 wb = openpyxl.Workbook()
 ws = wb.active
 ws.title = 'Data'
+ws.append(['Set Point', 'Output', 'Timestamp'])
 
-ws.cell(row=1, column=1, value='Value')
-ws.cell(row=1, column=2, value='Timestamp')
-ws.cell(row=1, column=3, value='Set Point')
+ws2 = wb.create_sheet('Parameters')
+ws2.append(['Kp', 'Ki', 'Kd'])
+ws2.append([gv.PID_kp.value, gv.PID_ki.value, gv.PID_kd.value])
 
 # map/scale PID output into 0 - 100 range
 def map_range(value, inMin, inMax, outMin, outMax):
@@ -73,7 +74,7 @@ def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_s
         #    prev_temp_value = current_temp_value
 
         # record the climate data every second
-        row = (temp1.value, timestamp, PID_set_point.value)
+        row = (PID_set_point.value, temp1.value, timestamp)
         ws.append(row)
         wb.save(excel_name)
 
@@ -116,11 +117,14 @@ def process2(hum1, PID_kp, PID_ki, PID_kd, PID_pv, PID_output, PID_set_point, PW
 def process3(PWM_enabled, PWM_high_time, PWM_low_time):
     while True:
         if PWM_enabled.value == 1:
+            # set the relayPin to HIGH as long as the PWM_high_time.value
             GPIO.output(relayPin, GPIO.HIGH) 
             time.sleep(PWM_high_time.value) 
+            # if PWM_low_time.value != 0, set the relayPin to LOW as long as the PWM_high_time.value
             if PWM_low_time.value != 0:
                 GPIO.output(relayPin, GPIO.LOW) 
                 time.sleep(PWM_low_time.value) 
+        # if PWM_enabled.value == 0, set relayPin to LOW
         else: 
             GPIO.output(relayPin, GPIO.LOW) 
             time.sleep(1)
