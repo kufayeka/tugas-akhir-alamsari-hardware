@@ -7,7 +7,7 @@ import signal
 p = subprocess.Popen(["python", "main.py"])
 
 # Tunggu selama 5 detik
-time.sleep(1800)
+time.sleep(1200)
 
 # Hentikan main.py dengan keyboard interrupt (CTRL+C)
 if os.name == "nt":  # Windows
