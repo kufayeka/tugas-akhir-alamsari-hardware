@@ -31,7 +31,7 @@ def read_climate_sensors():
     humidity2 = sensor2.read_register(0, 1) 
 
     # Assign nilai variabel
-    gv.temp1.value = temperature1
-    gv.hum1.value = humidity1
-    gv.temp2.value = temperature2
-    gv.hum2.value = humidity2
+    gv.temp1.set(temperature1)
+    gv.hum1.set(humidity1)
+    gv.temp2.set(temperature2)
+    gv.hum2.set(humidity2)

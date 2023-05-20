@@ -19,3 +19,50 @@ value           | timestamp
 random_value    | current_timestamp
 
 and everytime I run the script, it creates new sqlite3 db file named: data_klimat_$timestamp(tanggal, jam saat script dijalankan).db
+
+
+
+write me a raspi python script that gives this options:
+
+- kp
+- ki
+- kd 
+- set_point 
+- max_interval
+- min_interval 
+
+and when I selected one for example set_point, it prompts me with "change value to:" and when I enter the value and press enter, the value get saved into a variable named set_point
+do the same for each option
+
+
+how can I implement this python multiprocessing code below
+
+variable1 = 0.1
+variable2 = 0.7
+
+process_1():
+    while true:
+        print(variable1)
+        print(variable2)
+        sleep(1)
+
+process_2():
+    while true:
+        read sensor -> variable1, variable2
+        sleep(3)
+
+
+so lets say i have this multiprocessing program:
+
+
+def process_1:
+    while True:
+        read_sensor()
+        sleep(1)
+
+def process_2:
+    while true:
+        print(humidity1)
+        sleep(5)
+
+how can I access the returned read_sensor values in this process_2?
