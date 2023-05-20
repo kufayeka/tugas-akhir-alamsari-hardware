@@ -22,7 +22,11 @@ def on_publish(client, userdata, mid):
     print("Message published")
 
 broker_address = "192.168.43.38"
+broker_username = "petra_mqtt_broker"
+broker_password = "petraMqttBroker777"
+
 client = mqtt.Client("P1")
+client.username_pw_set(broker_username, broker_password)
 client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 client.on_message = on_message
