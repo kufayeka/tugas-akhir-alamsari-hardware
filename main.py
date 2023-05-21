@@ -24,14 +24,6 @@ pid.auto_mode = True
 pid.proportional_on_measurement = False
 pid.differential_on_measurement = True
 
-# mqtt configurations
-broker_address = "192.168.43.38"
-#broker_address = "broker.hivemq.com"
-broker_username = "petra_mqtt_broker"
-broker_password = "petraMqttBroker777"
-client = mqtt.Client(client_id="1n!Cl1n3t1D_", clean_session=True, userdata=None, transport="tcp")
-client.username_pw_set(broker_username, broker_password)
-
 # multiprocessing variables manager
 manager = multiprocessing.Manager()
 
@@ -52,7 +44,37 @@ def map_range(value, inMin, inMax, outMin, outMax):
     result = outMin + (((value - inMin) / (inMax - inMin)) * (outMax - outMin))
     return result
 
-#############################################################################
+#######################################################################################
+class MQTTPublisher:
+    def __init__(self, broker_address, broker_username, broker_password):
+        self.client = mqtt.Client("efeifbeifwmdd")
+        self.client.username_pw_set(broker_username, broker_password)
+        self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
+        self.client.on_message = self.on_message
+        self.client.connect(broker_address)
+        self.client.loop_start()
+
+    def on_connect(self, client, userdata, flags, rc):
+        print("Connected to MQTT broker with result code " + str(rc))
+
+    def on_disconnect(self, client, userdata, rc):
+        if rc != 0:
+            print("Unexpected disconnection from MQTT broker")
+
+    def on_message(self, client, userdata, msg):
+        print("Received message: " + msg.topic + " " + str(msg.payload))
+
+    def publish_message(self, topic, message):
+        self.client.publish(topic, message)
+
+    def subscribe_topic(self, topic):
+        self.client.subscribe(topic)
+
+    def stop(self):
+        self.client.loop_stop()
+#######################################################################################
+
 def process1(temp1, temp2, hum1, hum2, PID_kp, PID_ki, PID_kd, PID_output, PID_set_point, PID_pv, PWM_high_time, PWM_low_time):
     # Initialize the previous temperature value
     prev_temp_value = None
@@ -144,12 +166,14 @@ def process3(PWM_enabled, PWM_high_time, PWM_low_time):
         else: 
             GPIO.output(relayPin, GPIO.LOW) 
             time.sleep(1)
-#############################################################################
 
-def process4(x, temp1):
+def process4(broker_address, broker_username, broker_password):
     while True:
-        publish_msg(x, temp1.value)
-        time.sleep(1)
+        publisher = MQTTPublisher(broker_address, broker_username, broker_password)
+        publisher.subscribe_topic("pussy_wet")
+        publisher.publish_message("pussy_wet", "and_moist")
+        time.sleep(5)
+        publisher.stop()
 
 def process5():
     while True:
@@ -157,30 +181,17 @@ def process5():
         time.sleep(3)
 
 #############################################################################
-def publish_msg(x, data):
-    x.publish("paho/temperature", data, 0, False)
-    print("process4 running", data)
-
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
-    # client.subscribe("$SYS/#")
-    client.subscribe("paho/temperature")
-    client.publish("paho/temperature", "i love you my love", 0, False)
-
-def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.payload))
-
-client.on_connect = on_connect
-client.on_message = on_message
-#############################################################################
 if __name__ == '__main__':
-    client.connect(broker_address, 1883, 60)
-    client.loop_start()
+    # mqtt configurations
+    broker_address = "192.168.43.38"
+    #broker_address = "broker.hivemq.com"
+    broker_username = "petra_mqtt_broker"
+    broker_password = "petraMqttBroker777"
 
     p1 = multiprocessing.Process(target=process1, args=(gv.temp1, gv.temp2, gv.hum1, gv.hum2, gv.PID_kp, gv.PID_ki, gv.PID_kd, gv.PID_output, gv.PID_set_point, gv.PID_pv, gv.PWM_high_time, gv.PWM_low_time,))
     p2 = multiprocessing.Process(target=process2, args=(gv.temp1, gv.PID_kp, gv.PID_ki, gv.PID_kd, gv.PID_pv, gv.PID_output, gv.PID_set_point, gv.PWM_enabled, gv.PWM_max_interval, gv.PWM_min_interval, gv.PWM_high_time, gv.PWM_low_time,))
     p3 = multiprocessing.Process(target=process3, args=(gv.PWM_enabled, gv.PWM_high_time, gv.PWM_low_time,))
-    p4 = multiprocessing.Process(target=process4, args=(client, gv.temp1,))
+    p4 = multiprocessing.Process(target=process4, args=(broker_address, broker_username, broker_password,))
     p5 = multiprocessing.Process(target=process5, args=())
 
     try:
