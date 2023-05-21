@@ -1,46 +1,38 @@
 import paho.mqtt.client as mqtt
 import time
 
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to broker")
-        client.subscribe("house/bulbs/bulb1")
-    else:
-        print("Connection failed")
-
-def on_disconnect(client, userdata, rc):
-    if rc != 0:
-        print("Unexpected disconnection")
-
-def on_message(client, userdata, message):
-    print("Message received:", message.payload.decode("utf-8"))
-    print("Message topic:", message.topic)
-    print("Message QoS:", message.qos)
-    print("Message retain flag:", message.retain)
-
-def on_publish(client, userdata, mid):
-    print("Message published")
-
 broker_address = "192.168.43.38"
+#broker_address = "broker.hivemq.com"
 broker_username = "petra_mqtt_broker"
 broker_password = "petraMqttBroker777"
 
-client = mqtt.Client("P1")
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    #client.subscribe("$SYS/#")
+    client.subscribe("paho/temperature")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    print(msg.topic+" "+str(msg.payload))
+
+client = mqtt.Client(client_id="1n!Cl1n3t1D_", clean_session=True, userdata=None, transport="tcp")
 client.username_pw_set(broker_username, broker_password)
 client.on_connect = on_connect
-client.on_disconnect = on_disconnect
 client.on_message = on_message
-client.on_publish = on_publish
 
-print("Creating new instance")
-client.connect(broker_address, port=1883)
+client.connect(broker_address, 1883, 60)
 
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
 client.loop_start()
 
-print("Publishing message to topic: house/bulbs/bulb1")
-client.publish("house/bulbs/bulb1", "OFF")
-
-time.sleep(4)
-
-client.loop_stop()
-client.disconnect()
+while True:
+    client.publish("paho/temperature", "brrrr", 0, False)
+    print("publish")
+    time.sleep(1)
