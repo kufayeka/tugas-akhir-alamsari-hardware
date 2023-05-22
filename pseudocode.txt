@@ -93,3 +93,21 @@ client.loop_start()
 
 how can make the publish_msg method able to use the client? I want to publish an mqtt message
 I was able to publish an mqtt message if the client.publish("paho/temperature", data, 0, False) placed in on_connect method
+
+from time import sleep
+import RPi.GPIO as GPIO
+
+try:  
+    while True:  
+        mqttClass.publish(xxxxx)
+  
+except KeyboardInterrupt:  
+    print("interuptted")
+    mqttClass.stop()
+  
+except:  
+    print("error")
+  
+finally:  
+    GPIO.cleanup() # this ensures a clean exit
+    mqttClass.stop()
