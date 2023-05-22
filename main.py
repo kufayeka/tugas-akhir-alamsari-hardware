@@ -7,7 +7,8 @@ import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import schedule
 import time
-
+import os
+import sys
 
 from climate_sensors import read_climate_sensors
 from simple_pid import PID
@@ -19,8 +20,12 @@ def map_range(value, inMin, inMax, outMin, outMax):
     result = outMin + (((value - inMin) / (inMax - inMin)) * (outMax - outMin))
     return result
 
+def restart_program():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
 #############################################################################
-def process1(gv):
+def process1(gv, mqtt_instance):
     def sensors_job():
         # read RS485 climate sensors
         read_climate_sensors()
@@ -37,6 +42,7 @@ def process1(gv):
         print()
         print("PWM Timing / DutyCycle (secs): ")
         print(f"\tHigh Time:{gv.PWM_high_time.get():.3f} | Low Time:{gv.PWM_low_time.get():.3f}")
+        print()
 
     while True:
         sensors_job()
@@ -104,87 +110,82 @@ def process3(gv, relayPin):
             GPIO.output(relayPin, GPIO.LOW)
             time.sleep(1)
 
-def process4():
-    class MQTTModuleClass:
-        mqtt_is_connected = False
+def process4(gv, mqtt_instance):
+    def record_climate_sensors_results():
+        publish_message("pussy_wet", "and_moist", 1, False)
+        #mqtt_instance.stop()
+        #brrr()
 
-        def __init__(self, broker_address, broker_username, broker_password):
-            self.client = mqtt.Client("efeifbeifwmdd", clean_session=False)
-            self.client.username_pw_set(broker_username, broker_password)
-            self.client.on_connect = self.on_connect
-            self.client.on_disconnect = self.on_disconnect
-            self.client.on_message = self.on_message
-            self.client.on_connect_fail = self.on_connect_fail
-            try:
-                self.client.connect(broker_address)
-            except:
-                print("connect error")
-            self.client.loop_start()
-            self.client.reconnect_delay_set(min_delay=1, max_delay=120)
+    schedule.every(1).second.do(record_climate_sensors_results)
 
-        def on_connect(self, client, userdata, flags, rc):
-            if rc == 0:
-                self.mqtt_is_connected = True
-                print("Connected to MQTT broker with result code " + str(rc))
-                self.client.subscribe("pussy_wet")
-            else:
-                print("Failed to connect to Broker, return code =", rc)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
-        def on_disconnect(self, client, userdata, rc):
-            self.mqtt_is_connected = False
-            if rc != 0:
-                print("Unexpected disconnection from MQTT broker")
-
-        def on_connect_fail(self, client, userdata, rc):
-            self.mqtt_is_connected = False
-            print("Connection Failed")
-            self.reconnect()
-
-        def on_message(self, client, userdata, msg):
-            print("Received message: " + msg.topic + " " + str(msg.payload))
-
-        def publish_message(self, topic, message):
-            self.client.publish(topic, message)
-
-        def subscribe_topic(self, topic):
-            self.client.subscribe(topic)
-
-        def check_connection(self):
-            return self.client.is_connected()
-
-        def reconnect(self):
-            self.client.connect(broker_address)
-            print("reconnect")
-            time.sleep(5)
-
-        def stop(self):
-            self.client.loop_stop()
-
-    try:
-        broker_address = "192.168.43.38"
-        broker_username = "petra_mqtt_broker"
-        broker_password = "petraMqttBroker777"
-
-        mqtt_instance = MQTTModuleClass(broker_address, broker_username, broker_password)
-
-        while True:
-            print("Connection status:", mqtt_instance.check_connection())
-
-            if not mqtt_instance.check_connection():
-                print("reconnecting...") # reconnect already handled in the bg for loop.start()
-
-            if mqtt_instance.mqtt_is_connected:
-                mqtt_instance.publish_message("pussy_wet", "and_moist")
-                time.sleep(1)
-            else:
-                time.sleep(1)
-
-    except EOFError:
-        print("Error")
-
+is_connected = False  # Initial connection status is False
+CLEAN_SESSION = False
 #############################################################################
 if __name__ == '__main__':
     gv = global_variables
+    
+    broker_address = "192.168.43.38"
+    broker_username = "petra_mqtt_broker"
+    broker_password = "petraMqttBroker777"
+
+    def on_log(client, userdata, level, buf):
+        print("log:", buf)
+
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            # Connection is established
+            subscribe_topic("pussy_wet")
+            print()
+            print("Connected to MQTT broker with result code " + str(rc))
+            print()
+        else:
+            print("Failed to connect to Broker, return code =", rc)
+            # Connection failed
+
+    def on_disconnect(client, userdata, rc):
+        if rc != 0:
+            print("Unexpected disconnection from MQTT broker")
+            # Disconnected from broker
+
+    def on_message(client, userdata, msg):
+        print("Received message: " + msg.topic + " " + str(msg.payload))
+
+    def publish_message(topic, message, qos, retain):
+        if client.is_connected():
+            client.publish(topic, message, 1)
+            print("Publishing:", client.is_connected(), topic, message, qos, retain)
+            time.sleep(0.1)
+            client.loop_stop()
+        else:
+            print("Not connected to MQTT broker. Cannot publish message.", client.is_connected())
+
+    def subscribe_topic(topic):
+        client.subscribe(topic, 1)
+
+    def stop():
+        client.loop_stop()
+    
+    def brrr():
+        print("brrrrrr")
+
+    client = mqtt.Client("xchjkuiyuftckg",clean_session=False)
+    client.username_pw_set(broker_username, broker_password)
+    client.enable_logger()
+    client.reconnect_delay_set(min_delay=1, max_delay=120)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.on_disconnect = on_disconnect
+    client.on_log = on_log
+    
+    try:
+        client.connect(broker_address)
+    except:
+        print("Connection refused")
+    client.loop_start()
 
     # setup GPIO
     relayPin = 12
@@ -192,10 +193,12 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(relayPin, GPIO.OUT)
 
-    p1 = multiprocessing.Process(target=process1, args=(gv,))
+    time.sleep(2)
+    
+    p1 = multiprocessing.Process(target=process1, args=(gv, client))
     p2 = multiprocessing.Process(target=process2, args=(gv,))
     p3 = multiprocessing.Process(target=process3, args=(gv, relayPin))
-    p4 = multiprocessing.Process(target=process4, args=())
+    p4 = multiprocessing.Process(target=process4, args=(gv, client))
 
     try:
         print("STARTING...")
