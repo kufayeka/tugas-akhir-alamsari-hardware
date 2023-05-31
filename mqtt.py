@@ -1,10 +1,11 @@
+import json
 import time
 import paho.mqtt.client as mqtt
 
-broker_address = "192.168.43.38"
+broker_address = "203.189.122.131"
 broker_username = "petra_mqtt_broker"
 broker_password = "petraMqttBroker777"
-topic = "mytopic"
+topic = "petra/alamsari/kumbung_jamur/data_logger_klimat"
 qos = 1
 clean_session = False
 
@@ -29,8 +30,13 @@ client.connect(broker_address)
 client.loop_start()
 
 while True:
-    message = "bad bitch"
-    client.publish(topic, message, qos=qos)
+    payload = {
+                'temp1': 25,
+                'temp2': 26,
+                'hum1': 80,
+                'hum2': 76
+            }
+    client.publish(topic, json.dumps(payload), 1, False)
     time.sleep(1)
 
 client.loop_stop()

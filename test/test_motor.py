@@ -11,9 +11,11 @@ try:
     # here you put your main loop or block of code  
     while True:  
         GPIO.output(relayPin, GPIO.HIGH) 
-        sleep(0.1) 
-        GPIO.output(relayPin, GPIO.LOW)
-        sleep(0.1) 
+        print("motor on")
+        sleep(3) 
+        GPIO.output(relayPin, GPIO.HIGH)
+        print("motor off")
+        sleep(1) 
   
 except KeyboardInterrupt:  
     # here you put any code you want to run before the program   

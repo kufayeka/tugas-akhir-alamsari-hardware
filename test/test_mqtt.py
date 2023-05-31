@@ -1,38 +1,101 @@
-import paho.mqtt.client as mqtt
+#
+# Copyright 2021 HiveMQ GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 import time
 
-broker_address = "192.168.43.38"
-#broker_address = "broker.hivemq.com"
-broker_username = "petra_mqtt_broker"
-broker_password = "petraMqttBroker777"
+import paho.mqtt.client as paho
+from paho import mqtt
 
-# The callback for when the client receives a CONNACK response from the server.
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
 
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    #client.subscribe("$SYS/#")
-    client.subscribe("paho/temperature")
+# setting callbacks for different events to see if it works, print the message etc.
+def on_connect(client, userdata, flags, rc, properties=None):
+    """
+        Prints the result of the connection with a reasoncode to stdout ( used as callback for connect )
 
-# The callback for when a PUBLISH message is received from the server.
+        :param client: the client itself
+        :param userdata: userdata is set when initiating the client, here it is userdata=None
+        :param flags: these are response flags sent by the broker
+        :param rc: stands for reasonCode, which is a code for the connection result
+        :param properties: can be used in MQTTv5, but is optional
+    """
+    print("CONNACK received with code %s." % rc)
+
+
+# with this callback you can see if your publish was successful
+def on_publish(client, userdata, mid, properties=None):
+    """
+        Prints mid to stdout to reassure a successful publish ( used as callback for publish )
+
+        :param client: the client itself
+        :param userdata: userdata is set when initiating the client, here it is userdata=None
+        :param mid: variable returned from the corresponding publish() call, to allow outgoing messages to be tracked
+        :param properties: can be used in MQTTv5, but is optional
+    """
+    print("mid: " + str(mid))
+
+
+# print which topic was subscribed to
+def on_subscribe(client, userdata, mid, granted_qos, properties=None):
+    """
+        Prints a reassurance for successfully subscribing
+
+        :param client: the client itself
+        :param userdata: userdata is set when initiating the client, here it is userdata=None
+        :param mid: variable returned from the corresponding publish() call, to allow outgoing messages to be tracked
+        :param granted_qos: this is the qos that you declare when subscribing, use the same one for publishing
+        :param properties: can be used in MQTTv5, but is optional
+    """
+    print("Subscribed: " + str(mid) + " " + str(granted_qos))
+
+
+# print message, useful for checking if it was successful
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    """
+        Prints a mqtt message to stdout ( used as callback for subscribe )
 
-client = mqtt.Client(client_id="1n!Cl1n3t1D_", clean_session=True, userdata=None, transport="tcp")
-client.username_pw_set(broker_username, broker_password)
+        :param client: the client itself
+        :param userdata: userdata is set when initiating the client, here it is userdata=None
+        :param msg: the message with topic and payload
+    """
+    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+
+
+# using MQTT version 5 here, for 3.1.1: MQTTv311, 3.1: MQTTv31
+# userdata is user defined data of any type, updated by user_data_set()
+# client_id is the given name of the client
+client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
 client.on_connect = on_connect
+
+# enable TLS for secure connection
+client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+# set username and password
+client.username_pw_set("<your_username>", "<your_password>")
+# connect to HiveMQ Cloud on port 8883 (default for MQTT)
+client.connect("<your_host>", 8883)
+
+# setting callbacks, use separate functions like above for better visibility
+client.on_subscribe = on_subscribe
 client.on_message = on_message
+client.on_publish = on_publish
 
-client.connect(broker_address, 1883, 60)
+# subscribe to all topics of encyclopedia by using the wildcard "#"
+client.subscribe("encyclopedia/#", qos=1)
 
-# Blocking call that processes network traffic, dispatches callbacks and
-# handles reconnecting.
-# Other loop*() functions are available that give a threaded interface and a
-# manual interface.
-client.loop_start()
+# a single publish, this can also be done in loops, etc.
+client.publish("encyclopedia/temperature", payload="hot", qos=1)
 
-while True:
-    client.publish("paho/temperature", "brrrr", 0, False)
-    print("publish")
-    time.sleep(1)
+# loop_forever for simplicity, here you need to stop the loop manually
+# you can also use loop_start and loop_stop
+client.loop_forever()
