@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-import json
-import time
-import global_variables as gv
-
 import minimalmodbus
-import multiprocessing
-import requests
-import RPi.GPIO as GPIO
 
 # set up sensor 1 : address=0x001
 sensor1 = minimalmodbus.Instrument('/dev/ttyUSB0', 1)
@@ -33,17 +26,26 @@ def calibrate_humidity(value):
         return value
 
 def read_climate_sensors():
-
     # Membaca nilai sensor1
-    temperature1 = sensor1.read_register(1, 1)  
-    humidity1 = sensor1.read_register(0, 1) 
+    temperature1 = sensor1.read_register(1, 1)
+    humidity1 = sensor1.read_register(0, 1)
+    calibrated_humidity1 = calibrate_humidity(humidity1)
 
     # Membaca nilai sensor2
-    temperature2 = sensor2.read_register(1, 1)  
-    humidity2 = sensor2.read_register(0, 1) 
+    temperature2 = sensor2.read_register(1, 1)
+    humidity2 = sensor2.read_register(0, 1)
+    calibrated_humidity2 = calibrate_humidity(humidity2)
 
-    # Assign nilai variabel
-    gv.temp1.set(calibrate_humidity(temperature1))
-    gv.hum1.set(calibrate_humidity(humidity1))
-    gv.temp2.set(calibrate_humidity(temperature2))
-    gv.hum2.set(calibrate_humidity(humidity2))
+    # Mengembalikan hasil pembacaan dalam format dictionary
+    readings = {
+        'sensor1': {
+            'temperature': temperature1,
+            'humidity': calibrated_humidity1
+        },
+        'sensor2': {
+            'temperature': temperature2,
+            'humidity': calibrated_humidity2
+        }
+    }
+
+    return readings

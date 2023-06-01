@@ -363,3 +363,13 @@ PWM_low_time = manager.Value('d', 0.000)
 
 MQTT_is_connected = manager.Value('d', 0)
 
+
+how to make these different intervals for these methods below:
+
+while True:
+    read_sensor()   -> 1 sec interval
+    record_data()   -> 10 sec interval
+    relay_on() -> dynamic interval based on relay_on_time variable
+    relay_off() -> dynamic interval based on relay_off_time variable
+    calculate_pid() -> no interval at all just looping
+

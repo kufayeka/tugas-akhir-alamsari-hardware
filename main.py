@@ -54,6 +54,7 @@ def process1(gv):
         print("PID Set Point:", gv.PID_set_point.get())
         print(f"PID Output: {gv.PID_output.get():.3f}")
         print()
+        print("PWM Enabled:", gv.PWM_enabled.value)
         print("PWM Timing / DutyCycle (secs): ")
         print(f"\tHigh Time:{gv.PWM_high_time.get():.3f} | Low Time:{gv.PWM_low_time.get():.3f}")
         print()
@@ -112,14 +113,14 @@ def process2(gv):
         gv.PWM_low_time.set(low_time)
 
         # guard PWM
-        if low_time < 0:
-            gv.PWM_enabled.set(0)
+        if high_time == 0:
+            gv.PWM_enabled.value = 0
         else:
-            gv.PWM_enabled.set(1)
+            gv.PWM_enabled.value = 1
 
 def process3(gv, relayPin, fanPin):
     while True:
-        if gv.PWM_enabled.value == 1 | 0:
+        if gv.PWM_enabled.value == 1:
             # set the relayPin to HIGH as long as the PWM_high_time.value
             GPIO.output(relayPin, GPIO.HIGH)
             GPIO.output(fanPin, GPIO.HIGH)
@@ -134,6 +135,7 @@ def process3(gv, relayPin, fanPin):
         # if PWM_enabled.value == 0, set relayPin to LOW
         else:
             GPIO.output(relayPin, GPIO.LOW)
+            GPIO.output(fanPin, GPIO.LOW)
             time.sleep(1)
 
 def process4(gv):

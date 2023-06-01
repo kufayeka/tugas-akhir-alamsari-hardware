@@ -21,7 +21,7 @@ def calibrate_humidity(value):
     elif 20 < value <= 60:
         return value - 3.5
     elif 60 < value <= 80:
-        return value - 3.8
+        return value - 4
     elif 80 < value <= 100:
         return value - 4.5
     else:

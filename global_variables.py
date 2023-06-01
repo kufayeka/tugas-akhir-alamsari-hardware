@@ -7,10 +7,10 @@ temp2 = manager.Value('d', 0.000)
 hum1 = manager.Value('d', 0.000)
 hum2 = manager.Value('d', 0.000)
 
-PID_kp = manager.Value('d', 8) # 30 * 0.6 = 18
-PID_ki = manager.Value('d', 0.001) # 30 * 1.2 / 420 = 0,086
-PID_kd = manager.Value('d', 0.1) # 30 * 420 * 0.075 = 945
-PID_set_point = manager.Value('d', 75)
+PID_kp = manager.Value('d', 5) # 30 * 0.6 = 18
+PID_ki = manager.Value('d', 0.03) # 30 * 1.2 / 420 = 0,086
+PID_kd = manager.Value('d', 0) # 30 * 420 * 0.075 = 945
+PID_set_point = manager.Value('d', 70)
 PID_pv = manager.Value('d', 0.000)
 PID_output = manager.Value('d', 0.000)
 
