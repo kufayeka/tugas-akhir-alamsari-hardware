@@ -369,7 +369,11 @@ how to make these different intervals for these methods below:
 while True:
     read_sensor()   -> 1 sec interval
     record_data()   -> 10 sec interval
+    calculate_pid() -> no interval at all just looping
+
+while True:
     relay_on() -> dynamic interval based on relay_on_time variable
     relay_off() -> dynamic interval based on relay_off_time variable
-    calculate_pid() -> no interval at all just looping
+
+these two while run is seperated from each other
 
