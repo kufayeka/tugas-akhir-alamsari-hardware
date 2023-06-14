@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import time
+import json
 
 # Informasi broker MQTT
 broker_address = "203.189.122.131"
@@ -42,11 +43,24 @@ client.on_message = on_message
 # Melakukan koneksi ke broker MQTT
 client.connect(broker_address)
 
-# Melakukan publish ke topic setiap 1 detik
-while True:
-    payload = "Hello, world!"
-    client.publish(topic, payload, qos=qos)
-    time.sleep(1)
+payload = {
+	'pid_settings': { 
+        'set_point': 70, 
+        'kp': 10, 
+        'ki': 0.1, 
+        'kd': 1, 
+        'interval_from': 0, 
+        'interval_to': 5 
+    },
+	'data_logger_settings': { 
+        'interval': 60
+    }
+}
 
-    # Memproses pesan yang diterima
-    client.loop()
+client.publish(topic, json.dumps(payload), qos=qos, retain=True)
+time.sleep(1)
+
+# Memproses pesan yang diterima
+client.loop()
+time.sleep(3)
+client.loop_stop()
