@@ -22,12 +22,12 @@ interval_time_from, interval_time_to, swap_intervals = 0, 5, False
 sensor_reading_interval = 1  # 1 second interval for read_sensor()
 interval_data_logger = 10
 
-# Informasi broker MQTT
+# Info broker MQTT
 broker_address = "203.189.122.131"
 broker_username = "petra_mqtt_broker"
 broker_password = "petraMqttBroker777"
 clean_session = False
-clientID = "hffsfusjdfksnfjsbfweoijdlkm"
+clientID = "RPiMQTTClient120230622_HardwareKumbungJamur"
 subscribe_qos = 1
 
 # MQTT Topic
@@ -87,18 +87,14 @@ def sensor_work():
 
     global PWM_high_time, PWM_low_time, PWM_enabled, PID_output
 
-    # Fungsi yang dipanggil saat koneksi berhasil dibuat
     def on_connect(client, userdata, flags, rc):
         print("Terhubung ke broker")
         client.subscribe(topikDataLogger, qos=subscribe_qos)
         client.subscribe(topikDataRealtime, qos=subscribe_qos)
         client.subscribe(topikSettingParameter, qos=subscribe_qos)
 
-    # Fungsi yang dipanggil saat menerima pesan MQTT
     def on_message(client, userdata, msg):
         #print(f"Pesan diterima: {msg.topic} {msg.payload.decode()}")
-        print("")
-
         global PID_kp
         global PID_ki
         global PID_kd
@@ -106,8 +102,6 @@ def sensor_work():
         global interval_time_from 
         global interval_time_to
         global interval_data_logger
-
-        #print(f"Pesan diterima: {msg.topic} {msg.payload.decode()}")
 
         if(str(msg.topic) == topikSettingParameter):
             global PID_kp
@@ -127,8 +121,8 @@ def sensor_work():
                 PID_kp = float(pid_settings.get("kp"))
                 PID_ki = float(pid_settings.get("ki"))
                 PID_kd = float(pid_settings.get("kd"))
-                interval_time_from = float(pid_settings.get("interval_from"))
-                interval_time_to = float(pid_settings.get("interval_to"))
+                interval_time_from = pid_settings.get("interval_from")
+                interval_time_to = pid_settings.get("interval_to")
 
             if data_logger_settings:
                 interval_data_logger = float(data_logger_settings.get("interval"))
@@ -137,20 +131,14 @@ def sensor_work():
 
     # Inisialisasi client MQTT
     client = mqtt.Client(clientID, clean_session=clean_session)
-
-    # Set username dan password jika ada
     if broker_username and broker_password:
         client.username_pw_set(broker_username, broker_password)
-
-    # Menetapkan fungsi yang akan dipanggil saat terhubung dan menerima pesan
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(broker_address)
-
     client.loop_start()
 
     prev_payload = None
-
     sensor1_temp = None
     sensor1_hum = None
     sensor2_temp = None
@@ -185,7 +173,7 @@ def sensor_work():
                     'timestamp': timestamp
                 }
 
-                client.publish(topikDataRealtime, json.dumps(payload), qos=1)
+                client.publish(topikDataRealtime, json.dumps(payload), qos=1, retain=True)
 
             sensor_last_time = time.time()
                 
@@ -197,10 +185,6 @@ def sensor_work():
             sensor2_hum = sensors_readings['sensor2']['humidity']
 
             timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-            # excel recorder
-            ws.append([timestamp, sensor1_temp, sensor2_temp, sensor1_hum, sensor2_hum, PID_set_point])
-            wb.save(excel_name)
 
             payload = {
                 'sensor1': {
@@ -215,8 +199,8 @@ def sensor_work():
                 }
             }
             
-            client.publish(topikDataLogger, str(payload), qos=1)
-            #print("Rekam Data Klimat:", timestamp)
+            client.publish(topikDataLogger, json.dumps(payload), qos=1)
+
             data_logger_last_time = time.time()
 
         # Continuously calculate PID
@@ -248,7 +232,7 @@ if __name__ == '__main__':
 
     # setup GPIO
     relayPin = 12
-    fanPin = 18	
+    fanPin = 18
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(relayPin, GPIO.OUT)

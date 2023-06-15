@@ -377,3 +377,41 @@ while True:
 
 these two while run is seperated from each other
 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+buat script python untuk publish mqtt:
+
+payload = {
+    'sensor1': {
+        'temperature': sensor1_temp,
+        'humidity': sensor1_hum,
+    },
+    'sensor2': {
+        'temperature': sensor2_temp,
+        'humidity': sensor2_hum,
+    },
+    'timestamp': timestamp
+}
+
+client.publish("petra/alamsari/kumbung_jamur/real_time/climate", json.dumps(payload), qos=1, retain=True)
+
+
+ini info brokernya:
+host: 203.189.122.131:1883
+username: "petra_mqtt_broker"
+password: "petraMqttBroker777"
+
+
+aku mau data 
+
+
+
+buat script python untuk populasikan table ini:
+"CREATE TABLE IF NOT EXISTS climate_sensors (timestamp DATETIME, temp1 FLOAT, temp2 FLOAT, hum1 FLOAT, hum2 FLOAT)",
+
+aku mau data 7 hari dengan timestamp interval 1 menit
+
+ini info databasenya:
+host = "localhost"
+user = "yekaa"
+password = "!Y3kaa_DB"
