@@ -4,7 +4,7 @@ import os
 import signal
 
 # Membuat subprocess dan menjalankan main.py
-p = subprocess.Popen(["python", "main_module.py"])
+p = subprocess.Popen(["python", "step_input_test.py"])
 
 # Tunggu selama 10 min
 time.sleep(600)

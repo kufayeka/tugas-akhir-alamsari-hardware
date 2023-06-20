@@ -13,7 +13,7 @@ try:
         GPIO.output(relayPin, GPIO.HIGH) 
         print("fan ON")
         sleep(2) 
-        GPIO.output(relayPin, GPIO.LOW) 
+        GPIO.output(relayPin, GPIO.HIGH) 
         print("fan OFF")
         sleep(1.1) 
  

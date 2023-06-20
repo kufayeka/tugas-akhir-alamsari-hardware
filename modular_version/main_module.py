@@ -89,8 +89,6 @@ def sensor_work():
 
     def on_connect(client, userdata, flags, rc):
         print("Terhubung ke broker")
-        client.subscribe(topikDataLogger, qos=subscribe_qos)
-        client.subscribe(topikDataRealtime, qos=subscribe_qos)
         client.subscribe(topikSettingParameter, qos=subscribe_qos)
 
     def on_message(client, userdata, msg):
@@ -201,6 +199,10 @@ def sensor_work():
             
             client.publish(topikDataLogger, json.dumps(payload), qos=1)
 
+             # excel recorder
+            ws.append([timestamp, sensor1_temp, sensor2_temp, sensor1_hum, sensor2_hum, PID_set_point])
+            wb.save(excel_name)
+
             data_logger_last_time = time.time()
 
         # Continuously calculate PID
@@ -215,7 +217,7 @@ def relay_work(pwm_en, pwm_high, pwm_low):
         if pwm_en.value == True:
             # Turn on the relay
             #print("PWM Enabled", pwm_high.value, pwm_low.value)
-            GPIO.output(relayPin, GPIO.LOW)
+            GPIO.output(relayPin, GPIO.HIGH)
             time.sleep(pwm_high.value)
             # Turn off the relay
             GPIO.output(relayPin, GPIO.LOW)
@@ -237,6 +239,8 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(relayPin, GPIO.OUT)
     GPIO.setup(fanPin, GPIO.OUT)
+
+    GPIO.output(fanPin, GPIO.HIGH)
 
     try:
         print("STARTING...\n\n")

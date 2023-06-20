@@ -12,7 +12,7 @@ try:
     while True:  
         GPIO.output(relayPin, GPIO.LOW) 
         print("fan ON")
-        sleep(5) 
+        sleep(3) 
         GPIO.output(relayPin, GPIO.LOW) 
         print("fan OFF")
         sleep(5) 
