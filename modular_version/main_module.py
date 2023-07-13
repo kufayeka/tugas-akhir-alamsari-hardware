@@ -34,6 +34,7 @@ subscribe_qos = 1
 topikDataRealtime = "petra/alamsari/kumbung_jamur/real_time/climate"
 topikDataLogger = "petra/alamsari/kumbung_jamur/data_logger/climate"
 topikSettingParameter = "petra/alamsari/kumbung_jamur/setting/all_parameters"
+topikLastwill = clientID + "/status"
 
 manager = multiprocessing.Manager()
 
@@ -89,6 +90,10 @@ def sensor_work():
     def on_connect(client, userdata, flags, rc):
         print("Terhubung ke broker")
         client.subscribe(topikSettingParameter, qos=subscribe_qos)
+        client.publish(topikLastwill, "online", retain=True)
+    
+    def on_disconnect(client, userdata, rc):
+        client.will_set(lastwill_topic, "offline", retain=True)
 
     def on_message(client, userdata, msg):
         #print(f"Pesan diterima: {msg.topic} {msg.payload.decode()}")
@@ -131,8 +136,10 @@ def sensor_work():
     if broker_username and broker_password:
         client.username_pw_set(broker_username, broker_password)
     client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
     client.on_message = on_message
     client.connect(broker_address)
+    client.will_set(topikLastwill, "offline", retain=True) 
     client.loop_start()
 
     prev_payload = None
