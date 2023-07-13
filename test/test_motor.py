@@ -1,11 +1,10 @@
 from time import sleep
-
 import RPi.GPIO as GPIO
 
-relayPin = 18				# PWM pin connected to LED
-GPIO.setwarnings(False)			#disable warnings
-GPIO.setmode(GPIO.BOARD)		#set pin numbering system
-GPIO.setup(relayPin,GPIO.OUT)
+relayPin = 18				    # PWM pin connected to LED
+GPIO.setwarnings(False)			# disable warnings
+GPIO.setmode(GPIO.BOARD)		# set pin numbering system
+GPIO.setup(relayPin, GPIO.OUT)   
 
 try:  
     # here you put your main loop or block of code  
@@ -13,7 +12,7 @@ try:
         GPIO.output(relayPin, GPIO.LOW) 
         print("fan ON")
         sleep(3) 
-        GPIO.output(relayPin, GPIO.LOW) 
+        GPIO.output(relayPin, GPIO.HIGH) 
         print("fan OFF")
         sleep(5) 
 

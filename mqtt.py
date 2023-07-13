@@ -45,10 +45,10 @@ client.connect(broker_address)
 
 payload = {
 	'pid_settings': { 
-        'set_point': 77, 
-        'kp': 0.6599999999999966, 
-        'ki': 1.1492541601694568, 
-        'kd': 0.09475710749999951, 
+        'set_point': 75, 
+        'kp': 10, 
+        'ki': 0.1, 
+        'kd': 1, 
         'interval_from': 0, 
         'interval_to': 5 
     },

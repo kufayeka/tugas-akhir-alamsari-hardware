@@ -4,10 +4,10 @@ import os
 import signal
 
 # Membuat subprocess dan menjalankan main.py
-p = subprocess.Popen(["python", "step_input_test.py"])
+p = subprocess.Popen(["python", "main_module.py"])
 
 # Tunggu selama 10 min
-time.sleep(600)
+time.sleep(1200)
 
 # Hentikan main.py dengan keyboard interrupt (CTRL+C)
 if os.name == "nt":  # Windows

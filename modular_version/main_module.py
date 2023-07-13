@@ -27,7 +27,7 @@ broker_address = "203.189.122.131"
 broker_username = "petra_mqtt_broker"
 broker_password = "petraMqttBroker777"
 clean_session = False
-clientID = "RPiMQTTClient120230622_HardwareKumbungJamur"
+clientID = "RPiMQTTClient18072000_HardwareKumbungJamur"
 subscribe_qos = 1
 
 # MQTT Topic
@@ -46,7 +46,6 @@ wb = openpyxl.Workbook()
 ws = wb.active
 ws.title = 'Data'
 ws.append(['Timestamp', 'Temperature 1', 'Temperature 2', 'Humidity 1', 'Humidity 2', 'Set Point'])
-
 
 def command_line_printer(ts):
     global sensors_readings 
