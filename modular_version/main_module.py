@@ -206,8 +206,8 @@ def sensor_work():
             client.publish(topikDataLogger, json.dumps(payload), qos=1)
 
              # excel recorder
-            ws.append([timestamp, sensor1_temp, sensor2_temp, sensor1_hum, sensor2_hum, PID_set_point])
-            wb.save(excel_name)
+            #ws.append([timestamp, sensor1_temp, sensor2_temp, sensor1_hum, sensor2_hum, PID_set_point])
+            #wb.save(excel_name)
 
             data_logger_last_time = time.time()
 
@@ -245,9 +245,7 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(relayPin, GPIO.OUT)
     GPIO.setup(fanPin, GPIO.OUT)
-
-    GPIO.output(fanPin, GPIO.HIGH)
-
+    #GPIO.output(fanPin, GPIO.LOW)
     try:
         print("STARTING...\n\n")
         time.sleep(1)
